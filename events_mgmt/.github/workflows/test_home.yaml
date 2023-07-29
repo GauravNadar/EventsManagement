@@ -1,0 +1,56 @@
+name: Initial Test
+
+on:
+    workflow_call:
+    workflow_dispatch:
+    push:
+       branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+  initial_build:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: events_user
+      POSTGRES_PASSWORD: events_password
+      POSTGRES_HOST: localhost
+      POSTGRES_DB: events
+      POSTGRES_PORT: 5432
+    services:
+        postgres:
+          image: postgres:15
+          env:
+            POSTGRES_USER: ${{ env.POSTGRES_USER }}
+            POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+            POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+          ports:
+            # Maps tcp port 5432 on service container to the host
+            - 5432:5432
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+           python-version: 3.9
+      - name: Install requirements
+        run: |
+            cd events_mgmt
+            pip install -r requirements.txt
+      - name: Run tests
+        env:
+          DB_NAME: ${{ env.POSTGRES_DB }}
+          DB_USERNAME: ${{ env.POSTGRES_USER }}
+          DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          DB_HOST: ${{ env.POSTGRES_HOST }}
+          DB_PORT: ${{ env.POSTGRES_PORT }}
+        run: |
+            cd events_mgmt
+            python manage.py test
