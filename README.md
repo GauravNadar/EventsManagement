@@ -39,16 +39,11 @@
 ### change setting.py to point to your local db
 
 ```
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '{yourdbname}', 
-        'USER': '{youruser}',
-        'PASSWORD': '{yourpassword}',
-        'HOST': '127.0.0.1', 
-        'PORT': '5432',
-    }
-}
+DATABASE_NAME = os.environ.get("DB_NAME", 'yourdbname')
+DATABASE_USERNAME = os.environ.get("DB_USERNAME", 'youruser')
+DATABASE_PASSWORD = os.environ.get("DB_PASSWORD", 'yourpassword')
+DATABASE_HOST = os.environ.get("DB_HOST", 'localhost')
+DATABASE_PORT = os.environ.get("DB_PORT", '5432')
 ```
 ---
 
